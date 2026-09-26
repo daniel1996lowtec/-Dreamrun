@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#05060f" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="DREAM RUN" />
+    <meta name="application-name" content="DREAM RUN" />
+    <meta name="description" content="DREAM RUN — the luxury crypto endless runner. Dodge, jump and slide through a neon crypto city as the $DREAM CEO. Install on Android and play offline!" />
+    <meta name="orientation" content="portrait" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="512x512" href="./icons/dream-512.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="./icons/dream-512.png" />
+    <link rel="apple-touch-icon" href="./icons/dream-512.png" />
+    <title>DREAM RUN — $DREAM Endless Runner</title>
+    <style>
+      html, body { margin: 0; padding: 0; background: #05060f; height: 100%; overscroll-behavior: none; }
+      #root { height: 100%; }
+      #boot-splash {
+        position: fixed; inset: 0; z-index: 9999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: radial-gradient(ellipse at 50% 30%, #1a1408 0%, #05060f 70%);
+        color: #ffd75e; font-family: system-ui, sans-serif;
+        transition: opacity .4s ease;
+      }
+      #boot-splash .crown { font-size: 52px; animation: bootPulse 1.2s ease-in-out infinite; }
+      #boot-splash .title { margin-top: 12px; font-weight: 900; letter-spacing: .2em; font-size: 22px;
+        background: linear-gradient(180deg,#fffbe8,#ffd75e 55%,#b57e00);
+        -webkit-background-clip: text; background-clip: text; color: transparent; }
+      #boot-splash .bar { margin-top: 18px; width: 160px; height: 4px; border-radius: 4px; background: rgba(255,215,94,.15); overflow: hidden; }
+      #boot-splash .bar > div { height: 100%; width: 40%; border-radius: 4px; background: #ffd75e; animation: bootSlide 1s linear infinite; }
+      @keyframes bootPulse { 0%,100% { transform: scale(1) rotate(-4deg);} 50% { transform: scale(1.12) rotate(4deg);} }
+      @keyframes bootSlide { 0% { transform: translateX(-100%);} 100% { transform: translateX(400%);} }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="boot-splash">
+      <div class="crown">👑</div>
+      <div class="title">DREAM RUN</div>
+      <div class="bar"><div></div></div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
