@@ -1,0 +1,95 @@
+name: Android APK
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    name: Build DREAM RUN APK + AAB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web game
+        run: npm run build
+
+      - name: Init Capacitor Android
+        run: |
+          # Fresh platform every CI run = always in sync with capacitor.config.ts
+          rm -rf android
+          npx cap add android
+          npx cap sync android
+
+      - name: Generate icons + splash
+        run: |
+          # Uses resources/icon.png + resources/splash.png
+          npx @capacitor/assets generate --android --iconBackgroundColor '#05060f' --splashBackgroundColor '#05060f'
+
+      - name: Force portrait + game tweaks in Manifest
+        run: |
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          # Portrait orientation for the game activity
+          sed -i 's/android:screenOrientation="[^"]*"/android:screenOrientation="portrait"/g' "$MANIFEST" || true
+          if ! grep -q 'screenOrientation' "$MANIFEST"; then
+            sed -i 's/<activity /<activity android:screenOrientation="portrait" /' "$MANIFEST"
+          fi
+          # Keep screen on + hardware accelerated (smooth 60fps WebGL)
+          grep -q 'WAKE_LOCK' "$MANIFEST" || sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.WAKE_LOCK" />\n    <uses-permission android:name="android.permission.VIBRATE" />|' "$MANIFEST"
+          echo "---- AndroidManifest.xml ----"
+          cat "$MANIFEST"
+
+      - name: Build debug APK
+        run: |
+          cd android
+          ./gradlew assembleDebug --no-daemon --stacktrace
+          cd ..
+
+      - name: Build release AAB (Play-ready, unsigned)
+        run: |
+          cd android
+          ./gradlew bundleRelease --no-daemon --stacktrace
+          cd ..
+
+      - name: Rename outputs
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/debug/app-debug.apk out/dream-run.apk
+          cp android/app/build/outputs/bundle/release/app-release.aab out/dream-run.aab 2>/dev/null || echo "no aab"
+          ls -lh out/
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dream-run-apk
+          path: out/dream-run.apk
+          if-no-files-found: error
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dream-run-aab
+          path: out/dream-run.aab
+          if-no-files-found: warn
