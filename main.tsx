@@ -3,7 +3,23 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import { initInstallPrompt, initViewportVars, isNative, hideNativeSplash } from "./game/android";
+window.addEventListener("error", (e) => {
+  document.body.innerHTML = `
+    <pre style="color:red;background:#05060f;padding:20px;white-space:pre-wrap;font-size:16px">
+ERROR:
+${e.error?.stack || e.message}
+    </pre>
+  `;
+});
 
+window.addEventListener("unhandledrejection", (e) => {
+  document.body.innerHTML = `
+    <pre style="color:red;background:#05060f;padding:20px;white-space:pre-wrap;font-size:16px">
+PROMISE ERROR:
+${String(e.reason)}
+    </pre>
+  `;
+});
 // Android / PWA boot setup
 initViewportVars();
 initInstallPrompt();
